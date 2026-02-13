@@ -208,10 +208,31 @@ export function Pipeline() {
   const [candidateData, setCandidateData] = useState(candidates)
   const [selectedJob, setSelectedJob] = useState("all")
 
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
   const moveStage = (candidateId: string, newStage: Candidate["status"]) => {
     setCandidateData((prev) =>
       prev.map((c) => (c.id === candidateId ? { ...c, status: newStage } : c))
     )
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (!over) return
+
+    const candidateId = active.id as string
+    const newStage = over.data.current?.sortable?.containerId ||
+                     (over.id as string).replace("stage-", "") as Candidate["status"]
+
+    if (newStage && ["new", "screening", "interview", "offer", "hired"].includes(newStage)) {
+      moveStage(candidateId, newStage)
+    }
   }
 
   const filteredCandidates = selectedJob === "all" ? candidateData : candidateData.filter((c) => c.role === jobs.find((j) => j.id === selectedJob)?.title)
@@ -272,7 +293,7 @@ export function Pipeline() {
                 </DropdownMenu>
               </div>
               <SortableContext items={stageCandidates.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-                <div className="space-y-2 rounded-xl bg-secondary/50 p-2" data-stage-id={stage.id}>
+                <div className="space-y-2 rounded-xl bg-secondary/50 p-2" id={`stage-${stage.id}`} data-stage-id={stage.id}>
                   {stageCandidates.length === 0 ? (
                     <div className="flex h-24 items-center justify-center rounded-lg border-2 border-dashed border-border">
                       <p className="text-xs text-muted-foreground">No candidates</p>

@@ -57,7 +57,7 @@ export function SidebarNav({ activeTab, onTabChange }: SidebarNavProps) {
           </div>
           {!collapsed && (
             <span className="font-display text-lg font-bold tracking-tight text-sidebar-primary-foreground">
-              TalentAI
+              HireStream
             </span>
           )}
         </div>

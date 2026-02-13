@@ -4,14 +4,13 @@
  * Extracts clean text from resume files (PDF and plain text)
  */
 
-import { PDFParse } from 'pdf-parse'
+import pdf from 'pdf-parse'
 
 export async function parseResume(file: Buffer, mimeType: string): Promise<string> {
   try {
     // Handle PDF files
     if (mimeType === 'application/pdf') {
-      const pdfParser = new PDFParse()
-      const data = await pdfParser.parseBuffer(file)
+      const data = await pdf(file)
       return cleanText(data.text)
     }
 

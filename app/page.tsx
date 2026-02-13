@@ -10,6 +10,8 @@ import { Interviews } from "@/components/dashboard/interviews"
 import { Messages } from "@/components/dashboard/messages"
 import { JobPostings } from "@/components/dashboard/job-postings"
 import { Settings } from "@/components/dashboard/settings"
+import { ScraperDashboard } from "@/components/dashboard/scraper-dashboard"
+import { AIChat } from "@/components/dashboard/ai-chat"
 
 const pageHeaders: Record<string, { title: string; description: string }> = {
   overview: { title: "Dashboard Overview", description: "Welcome back, Jane. Here's your recruitment activity at a glance." },
@@ -46,10 +48,11 @@ export default function Page() {
           {activeTab === "jobs" && <JobPostings />}
           {activeTab === "interviews" && <Interviews />}
           {activeTab === "messages" && <Messages />}
-          {activeTab === "scrapers" && <div className="text-muted-foreground">Scraper dashboard coming soon...</div>}
+          {activeTab === "scrapers" && <ScraperDashboard />}
           {activeTab === "settings" && <Settings />}
         </div>
       </main>
+      <AIChat />
     </div>
   )
 }

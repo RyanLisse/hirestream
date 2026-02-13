@@ -92,7 +92,15 @@ function GradeLabel({ score }: { score: number }) {
   return <Badge variant="destructive">Below Threshold</Badge>
 }
 
-function CandidateDetail({ candidate, onClose }: { candidate: Candidate; onClose: () => void }) {
+function CandidateDetail({
+  candidate,
+  onClose,
+  onMatchToJob
+}: {
+  candidate: Candidate;
+  onClose: () => void;
+  onMatchToJob: (candidate: Candidate) => void;
+}) {
   const radarData = [
     { metric: "Skill Match", value: candidate.skillMatch },
     { metric: "Relevance", value: candidate.relevance },
@@ -211,10 +219,7 @@ function CandidateDetail({ candidate, onClose }: { candidate: Candidate; onClose
           <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">
             <FileText className="mr-2 h-4 w-4" /> View Resume
           </Button>
-          <Button variant="outline" className="flex-1" onClick={() => {
-            setSelectedCandidateForMatch(candidate)
-            setMatchDialogOpen(true)
-          }}>
+          <Button variant="outline" className="flex-1" onClick={() => onMatchToJob(candidate)}>
             <Zap className="mr-2 h-4 w-4" /> Match to Job
           </Button>
           <Button variant="outline" className="flex-1">
@@ -399,7 +404,14 @@ export function AIGrading() {
       {selected && (
         <div className="lg:col-span-5">
           <div className="sticky top-6">
-            <CandidateDetail candidate={selected} onClose={() => setSelected(null)} />
+            <CandidateDetail
+              candidate={selected}
+              onClose={() => setSelected(null)}
+              onMatchToJob={(candidate) => {
+                setSelectedCandidateForMatch(candidate)
+                setMatchDialogOpen(true)
+              }}
+            />
           </div>
         </div>
       )}

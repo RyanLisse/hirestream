@@ -8,7 +8,7 @@
 import { anthropic } from '@ai-sdk/anthropic'
 import { generateObject } from 'ai'
 import { z } from 'zod'
-import type { Job } from '@/lib/data'
+import type { Job } from '../data'
 import type {
   MatchResult,
   MatchLevel,
@@ -34,11 +34,13 @@ const scoringResultSchema = z.object({
 })
 
 const matchAnalysisSchema = z.object({
-  knockOutResults: z.array(knockOutResultSchema),
-  scoringResults: z.array(scoringResultSchema),
-  summary: z.string(),
-  recommendations: z.array(z.string()),
+  knockOutResults: z.array(knockOutResultSchema).min(1),
+  scoringResults: z.array(scoringResultSchema).min(1),
+  summary: z.string().min(10),
+  recommendations: z.array(z.string()).min(1),
 })
+
+type MatchAnalysis = z.infer<typeof matchAnalysisSchema>
 
 interface MatchCandidateToJobOptions {
   resumeText: string
@@ -200,12 +202,7 @@ function generateDefaultScoring(job: Job): ScoringCriterion[] {
 }
 
 function calculateMatchResult(
-  analysis: {
-    knockOutResults: KnockOutResult[]
-    scoringResults: ScoringResult[]
-    summary: string
-    recommendations: string[]
-  },
+  analysis: MatchAnalysis,
   knockOuts: KnockOutCriterion[],
   scoring: ScoringCriterion[]
 ): MatchResult {
@@ -241,8 +238,8 @@ function calculateMatchResult(
   return {
     overallMatch,
     knockOutsPassed,
-    knockOutResults: analysis.knockOutResults,
-    scoringResults: analysis.scoringResults,
+    knockOutResults: analysis.knockOutResults as KnockOutResult[],
+    scoringResults: analysis.scoringResults as ScoringResult[],
     totalWeightedScore,
     summary: analysis.summary,
     riskProfile,
@@ -251,10 +248,7 @@ function calculateMatchResult(
 }
 
 function calculateRiskProfile(
-  analysis: {
-    knockOutResults: KnockOutResult[]
-    scoringResults: ScoringResult[]
-  },
+  analysis: MatchAnalysis,
   totalWeightedScore: number,
   knockOutsPassed: boolean
 ): RiskProfile {

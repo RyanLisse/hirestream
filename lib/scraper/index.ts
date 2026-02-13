@@ -1,4 +1,5 @@
-import * as cheerio from "cheerio"
+// Dynamic import for cheerio to handle optional dependency
+let cheerio: any = null
 
 export interface ScrapedJob {
   title: string
@@ -29,6 +30,11 @@ export interface ScrapeConfig {
 
 export async function scrapeJobs(config: ScrapeConfig): Promise<ScrapedJob[]> {
   try {
+    // Load cheerio if not already loaded
+    if (!cheerio) {
+      cheerio = await import("cheerio")
+    }
+
     const url = new URL(config.baseUrl)
     // Add search query as parameter if not already in baseUrl
     if (!url.search.includes(encodeURIComponent(config.searchQuery))) {
@@ -51,7 +57,7 @@ export async function scrapeJobs(config: ScrapeConfig): Promise<ScrapedJob[]> {
 
     const jobs: ScrapedJob[] = []
 
-    $(config.selectors.jobList).each((index, element) => {
+    $(config.selectors.jobList).each((index: number, element: any) => {
       try {
         const $job = $(element)
 
