@@ -2,31 +2,16 @@
 
 import { useState } from "react"
 import { SidebarNav } from "@/components/dashboard/sidebar-nav"
-import { Overview } from "@/components/dashboard/overview"
-import { AIGrading } from "@/components/dashboard/ai-grading"
-import { Pipeline } from "@/components/dashboard/pipeline"
-import { TalentPool } from "@/components/dashboard/talent-pool"
-import { Interviews } from "@/components/dashboard/interviews"
-import { Messages } from "@/components/dashboard/messages"
-import { JobPostings } from "@/components/dashboard/job-postings"
-import { Settings } from "@/components/dashboard/settings"
-import { ScraperDashboard } from "@/components/dashboard/scraper-dashboard"
+import { Vacatures } from "@/components/dashboard/vacatures"
 import { AIChat } from "@/components/dashboard/ai-chat"
 
 const pageHeaders: Record<string, { title: string; description: string }> = {
-  overview: { title: "Dashboard Overview", description: "Welcome back, Jane. Here's your recruitment activity at a glance." },
-  grading: { title: "AI Resume Grading", description: "Instant assessment based on skill matching, relevance & quality metrics." },
-  pipeline: { title: "Recruitment Pipeline", description: "Track candidates through every stage of the hiring process." },
-  "talent-pool": { title: "Smart Talent Pool", description: "Searchable database of all candidate profiles." },
-  jobs: { title: "Job Postings", description: "Manage open positions and applicant flow." },
-  interviews: { title: "Interview Management", description: "Schedule, track, and collect interview feedback." },
-  messages: { title: "Messaging Center", description: "Bulk messaging, templates, and communication tracking." },
-  scrapers: { title: "Scrapers", description: "Manage candidate sourcing and data collection." },
-  settings: { title: "Settings", description: "Configure your recruitment platform preferences." },
+  vacatures: { title: "Vacatures", description: "Alle gescrapete opdrachten van Striive, Opdrachtoverheid en Flextender." },
+  scrapers: { title: "Scrapers", description: "Beheer platformkoppelingen en synchronisatie-instellingen." },
 }
 
 export default function Page() {
-  const [activeTab, setActiveTab] = useState("overview")
+  const [activeTab, setActiveTab] = useState("vacatures")
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -41,15 +26,10 @@ export default function Page() {
           </p>
         </div>
         <div className="p-8">
-          {activeTab === "overview" && <Overview />}
-          {activeTab === "grading" && <AIGrading />}
-          {activeTab === "pipeline" && <Pipeline />}
-          {activeTab === "talent-pool" && <TalentPool />}
-          {activeTab === "jobs" && <JobPostings />}
-          {activeTab === "interviews" && <Interviews />}
-          {activeTab === "messages" && <Messages />}
-          {activeTab === "scrapers" && <ScraperDashboard />}
-          {activeTab === "settings" && <Settings />}
+          {activeTab === "vacatures" && <Vacatures />}
+          {activeTab === "scrapers" && (
+            <div className="text-muted-foreground text-sm">Scrapers — binnenkort beschikbaar.</div>
+          )}
         </div>
       </main>
       <AIChat />
