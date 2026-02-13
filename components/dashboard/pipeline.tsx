@@ -27,6 +27,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  DndContext,
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core"
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 
 const stages = [
   { id: "new", label: "New", color: "bg-muted-foreground" },
@@ -38,7 +50,14 @@ const stages = [
 
 type StageId = (typeof stages)[number]["id"]
 
-function CandidateCard({ candidate, onMoveStage }: { candidate: Candidate; onMoveStage: (id: string, stage: Candidate["status"]) => void }) {
+function DraggableCandidateCard({ candidate, onMoveStage }: { candidate: Candidate; onMoveStage: (id: string, stage: Candidate["status"]) => void }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useSortable({ id: candidate.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+  }
+
   const scoreColor =
     candidate.score >= 90
       ? "text-accent"
@@ -51,9 +70,19 @@ function CandidateCard({ candidate, onMoveStage }: { candidate: Candidate; onMov
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <div className="group cursor-pointer rounded-lg border border-border bg-card p-3 transition-all hover:border-primary/30 hover:shadow-sm">
+        <div
+          ref={setNodeRef}
+          style={style}
+          className={`group cursor-pointer rounded-lg border border-border bg-card p-3 transition-all hover:border-primary/30 hover:shadow-sm ${
+            isDragging ? "shadow-lg ring-2 ring-primary" : ""
+          }`}
+        >
           <div className="flex items-start gap-2.5">
-            <div className="mt-0.5 cursor-grab text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100">
+            <div
+              className="mt-0.5 cursor-grab text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
+              {...attributes}
+              {...listeners}
+            >
               <GripVertical className="h-4 w-4" />
             </div>
             <Avatar className="h-8 w-8 shrink-0">
@@ -188,13 +217,14 @@ export function Pipeline() {
   const filteredCandidates = selectedJob === "all" ? candidateData : candidateData.filter((c) => c.role === jobs.find((j) => j.id === selectedJob)?.title)
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="font-display text-lg font-bold text-foreground">Recruitment Pipeline</h2>
-          <p className="text-sm text-muted-foreground">Drag candidates through stages to track progress</p>
-        </div>
+    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-display text-lg font-bold text-foreground">Recruitment Pipeline</h2>
+            <p className="text-sm text-muted-foreground">Drag candidates between stages to move them through the pipeline</p>
+          </div>
         <div className="flex items-center gap-3">
           <Select value={selectedJob} onValueChange={setSelectedJob}>
             <SelectTrigger className="w-[220px]">
@@ -241,17 +271,19 @@ export function Pipeline() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <div className="space-y-2 rounded-xl bg-secondary/50 p-2">
-                {stageCandidates.length === 0 ? (
-                  <div className="flex h-24 items-center justify-center rounded-lg border-2 border-dashed border-border">
-                    <p className="text-xs text-muted-foreground">No candidates</p>
-                  </div>
-                ) : (
-                  stageCandidates.map((candidate) => (
-                    <CandidateCard key={candidate.id} candidate={candidate} onMoveStage={moveStage} />
-                  ))
-                )}
-              </div>
+              <SortableContext items={stageCandidates.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2 rounded-xl bg-secondary/50 p-2" data-stage-id={stage.id}>
+                  {stageCandidates.length === 0 ? (
+                    <div className="flex h-24 items-center justify-center rounded-lg border-2 border-dashed border-border">
+                      <p className="text-xs text-muted-foreground">No candidates</p>
+                    </div>
+                  ) : (
+                    stageCandidates.map((candidate) => (
+                      <DraggableCandidateCard key={candidate.id} candidate={candidate} onMoveStage={moveStage} />
+                    ))
+                  )}
+                </div>
+              </SortableContext>
             </div>
           )
         })}
@@ -278,6 +310,7 @@ export function Pipeline() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </DndContext>
   )
 }

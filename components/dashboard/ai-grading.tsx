@@ -27,8 +27,17 @@ import {
   Lightbulb,
   TrendingUp,
   X,
+  Zap,
 } from "lucide-react"
-import { candidates, type Candidate } from "@/lib/data"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { candidates, jobs, type Candidate } from "@/lib/data"
+import { MatchReport } from "./match-report"
 import {
   RadarChart,
   Radar,
@@ -202,6 +211,12 @@ function CandidateDetail({ candidate, onClose }: { candidate: Candidate; onClose
           <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">
             <FileText className="mr-2 h-4 w-4" /> View Resume
           </Button>
+          <Button variant="outline" className="flex-1" onClick={() => {
+            setSelectedCandidateForMatch(candidate)
+            setMatchDialogOpen(true)
+          }}>
+            <Zap className="mr-2 h-4 w-4" /> Match to Job
+          </Button>
           <Button variant="outline" className="flex-1">
             <Download className="mr-2 h-4 w-4" /> Export Report
           </Button>
@@ -216,6 +231,10 @@ export function AIGrading() {
   const [scoreFilter, setScoreFilter] = useState("all")
   const [sortBy, setSortBy] = useState<"score" | "name" | "date">("score")
   const [selected, setSelected] = useState<Candidate | null>(null)
+  const [matchDialogOpen, setMatchDialogOpen] = useState(false)
+  const [selectedCandidateForMatch, setSelectedCandidateForMatch] = useState<Candidate | null>(null)
+  const [selectedJobForMatch, setSelectedJobForMatch] = useState("")
+  const [showMatchReport, setShowMatchReport] = useState(false)
 
   const filtered = candidates
     .filter((c) => {
@@ -384,6 +403,107 @@ export function AIGrading() {
           </div>
         </div>
       )}
+
+      {/* Match Report Dialog */}
+      <Dialog open={matchDialogOpen} onOpenChange={setMatchDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Match Candidate to Job</DialogTitle>
+            <DialogDescription>
+              Select a job position to see how well this candidate matches the requirements
+            </DialogDescription>
+          </DialogHeader>
+
+          {!showMatchReport ? (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-card-foreground">Candidate</label>
+                <div className="flex items-center gap-2 rounded-lg border border-border bg-secondary/30 p-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">
+                      {selectedCandidateForMatch?.avatar}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium text-card-foreground">{selectedCandidateForMatch?.name}</p>
+                    <p className="text-xs text-muted-foreground">{selectedCandidateForMatch?.role}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-card-foreground">Job Position</label>
+                <Select value={selectedJobForMatch} onValueChange={setSelectedJobForMatch}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a job..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobs.map((job) => (
+                      <SelectItem key={job.id} value={job.id}>
+                        {job.title} • {job.location}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                  onClick={() => setShowMatchReport(true)}
+                  disabled={!selectedJobForMatch}
+                >
+                  <Zap className="mr-2 h-4 w-4" /> Run Match Analysis
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setMatchDialogOpen(false)
+                    setShowMatchReport(false)
+                    setSelectedJobForMatch("")
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4 py-4">
+              {selectedCandidateForMatch && selectedJobForMatch && (
+                <MatchReport
+                  candidateName={selectedCandidateForMatch.name}
+                  jobTitle={jobs.find((j) => j.id === selectedJobForMatch)?.title || ""}
+                  overallScore={Math.round(
+                    (selectedCandidateForMatch.skillMatch +
+                      selectedCandidateForMatch.relevance +
+                      selectedCandidateForMatch.resumeQuality) / 3
+                  )}
+                />
+              )}
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowMatchReport(false)}
+                >
+                  Back to Selection
+                </Button>
+                <Button
+                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                  onClick={() => {
+                    setMatchDialogOpen(false)
+                    setShowMatchReport(false)
+                    setSelectedJobForMatch("")
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

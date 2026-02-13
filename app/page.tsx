@@ -19,6 +19,7 @@ const pageHeaders: Record<string, { title: string; description: string }> = {
   jobs: { title: "Job Postings", description: "Manage open positions and applicant flow." },
   interviews: { title: "Interview Management", description: "Schedule, track, and collect interview feedback." },
   messages: { title: "Messaging Center", description: "Bulk messaging, templates, and communication tracking." },
+  scrapers: { title: "Scrapers", description: "Manage candidate sourcing and data collection." },
   settings: { title: "Settings", description: "Configure your recruitment platform preferences." },
 }
 
@@ -45,6 +46,7 @@ export default function Page() {
           {activeTab === "jobs" && <JobPostings />}
           {activeTab === "interviews" && <Interviews />}
           {activeTab === "messages" && <Messages />}
+          {activeTab === "scrapers" && <div className="text-muted-foreground">Scraper dashboard coming soon...</div>}
           {activeTab === "settings" && <Settings />}
         </div>
       </main>

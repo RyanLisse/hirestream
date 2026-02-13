@@ -15,6 +15,7 @@ import {
   Search,
   Bell,
   Sparkles,
+  Globe,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -34,6 +35,7 @@ const navItems = [
   { id: "jobs", label: "Job Postings", icon: BriefcaseBusiness },
   { id: "interviews", label: "Interviews", icon: Calendar, badge: "3" },
   { id: "messages", label: "Messages", icon: MessageSquare },
+  { id: "scrapers", label: "Scrapers", icon: Globe },
   { id: "settings", label: "Settings", icon: Settings },
 ]
 
